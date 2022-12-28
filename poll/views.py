@@ -1,0 +1,102 @@
+from django.contrib.auth.models import User
+from django.shortcuts import render
+
+from rest_framework import viewsets, filters, generics
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.views import APIView
+
+from team.models import Team
+
+from .models import Poll, CategoryGroup, Category, Choice, Vote
+from .serializers import *
+
+
+class PollPagination(PageNumberPagination):
+    page_size = 2
+
+
+class PollViewSet(viewsets.ModelViewSet):
+    serializer_class = PollSerializer
+    queryset = Poll.objects.all()
+    pagination_class = PollPagination
+    #filter_backends = (filters.SearchFilter,)
+    #search_fields = ('account', 'title')
+
+    def get_queryset(self):
+        return self.queryset
+
+
+class GetGroupPolls(APIView):
+    pagination_class = PollPagination
+
+    def get(self, request, group_id):
+        p = Poll.objects.filter(category__group=group_id).order_by('-updated').all()
+        serializer = PopularPollSerializer(p, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class GetGroupPollsPopular(APIView):
+
+    def get(self, request, group_id):
+        p = Poll.objects.filter(category__group=group_id).order_by('-points')[:5]
+        serializer = PopularPollSerializer(p, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class GetCategoryPolls(APIView):
+    pagination_class = PollPagination
+
+    def get(self, request, cat_id):
+        p = Poll.objects.filter(category_id=cat_id).order_by('-updated').all()
+        serializer = PopularPollSerializer(p, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class GetCategoryPollsPopular(APIView):
+
+    def get(self, request, cat_id):
+        p = Poll.objects.filter(category_id=cat_id).order_by('-points')[:5]
+        serializer = PopularPollSerializer(p, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_latest_polls(request):
+    polls = Poll.objects.all().order_by('-created')[:6]
+    serializer = LatestPollSerializer(polls, many=True, context={'request': request})
+
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_popular_polls(request):
+    polls = Poll.objects.all().order_by('points')[:5]
+    serializer = PopularPollSerializer(polls, many=True, context={'request': request})
+
+    return Response(serializer.data)
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    serializer_class = GroupSerializer
+    queryset = CategoryGroup.objects.all()
+
+    def get_queryset(self):
+        return self.queryset
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+
+    def get_queryset(self):
+        return self.queryset
+
+
+@api_view(['GET'])
+def get_groups(request):
+    groups = CategoryGroup.objects.all()
+    serializer = GroupPollsSerializer(groups, many=True, context={'request': request})
+
+    return Response(serializer.data)
