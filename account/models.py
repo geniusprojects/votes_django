@@ -25,12 +25,13 @@ class Account(models.Model):
 def new_user(sender, instance, created, **kwargs):
     if created:
         Account.objects.create(user=instance)
-    instance.account.save()
+        instance.account.save()
 
 
 @receiver(post_save, sender=User)
-def save_user_account(sender, instance, **kwargs):
-    instance.account.save()
+def save_user_account(sender, instance, created, **kwargs):
+    if created:
+        instance.account.save()
 
 
 class Pin(models.Model):
