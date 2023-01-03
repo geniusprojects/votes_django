@@ -100,3 +100,21 @@ def get_groups(request):
     serializer = GroupPollsSerializer(groups, many=True, context={'request': request})
 
     return Response(serializer.data)
+
+
+class ChoiceViewSet(viewsets.ModelViewSet):
+    serializer_class = ChoiceSerializer
+    queryset = Choice.objects.all()
+    #filter_backends = (filters.SearchFilter,)
+    #search_fields = ('account', 'title')
+
+    def get_queryset(self):
+        return self.queryset
+
+
+class GetPollChoices(APIView):
+
+    def get(self, request, poll_id):
+        p = Choice.objects.filter(poll_id=poll_id).all()
+        serializer = ChoiceSerializer(p, many=True, context={'request': request})
+        return Response(serializer.data)
