@@ -22,20 +22,6 @@ class AccountSerializer(serializers.ModelSerializer):
         )
 
 
-class VoteSerializer(serializers.ModelSerializer):
-    account = AccountSerializer(read_only=True)
-    #poll = PollSerializer(read_only=True)
-
-    class Meta:
-        model = Vote
-        fields = (
-            'id',
-            'uid',
-            'account',
-            'comment',
-        )
-
-
 class PollSerializer(serializers.ModelSerializer):
     account = AccountSerializer(read_only=True)
     images = GallerySerializer(many=True, source='get_images')
@@ -73,6 +59,22 @@ class ChoiceSerializer(serializers.ModelSerializer):
             'choice_text',
             'votes',
             'color',
+        )
+
+
+class VoteSerializer(serializers.ModelSerializer):
+    account = AccountSerializer(read_only=True)
+    choice = ChoiceSerializer(read_only=True)
+
+    class Meta:
+        model = Vote
+        fields = (
+            'id',
+            'uid',
+            'account',
+            'comment',
+            'updated',
+            'choice',
         )
 
 

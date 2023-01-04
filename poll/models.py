@@ -78,6 +78,8 @@ class Vote(models.Model):
     comment = models.TextField('Comment', max_length=1000, blank=True, null=True)
     #value = models.BooleanField('Value')
     updated = models.DateTimeField(auto_now=True)
+    likes = models.IntegerField(default=0)
+    dislikes = models.IntegerField(default=0)
 
     def __str__(self):
         return self.choice.choice_text + ' (' + self.choice.poll.title + ')'

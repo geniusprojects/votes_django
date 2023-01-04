@@ -124,7 +124,7 @@ class GetPollVotes(APIView):
 
     def get(self, request, poll_id):
         choices = Choice.objects.filter(poll_id=poll_id).values('uid')
-        votes = Vote.objects.filter(choice__uid__in=choices).all()
+        votes = Vote.objects.filter(choice__uid__in=choices).order_by('-updated').all()
         serializer = VoteSerializer(votes, many=True, context={'request': request})
         return Response(serializer.data)
 
