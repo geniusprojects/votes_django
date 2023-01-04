@@ -9,6 +9,7 @@ router.register('groups', GroupViewSet, basename='groups')
 router.register('categories', CategoryViewSet, basename='categories')
 router.register('polls', PollViewSet, basename='polls')
 router.register('choices', ChoiceViewSet, basename='choices')
+router.register('votes', VoteViewSet, basename='votes')
 
 urlpatterns = [
     path('polls/latest/', get_latest_polls, name='get_latest_polls'),
@@ -22,5 +23,6 @@ urlpatterns = [
     path('categories/<int:cat_id>/polls/popular/', GetCategoryPollsPopular.as_view(), name='get_category__polls_popular'),
 
     path('polls/<uuid:poll_id>/choices/', GetPollChoices.as_view(), name='get_poll_choices'),
+    path('polls/<uuid:poll_id>/votes/', GetPollVotes.as_view(), name='get_poll_votes'),
     path('', include(router.urls)),
 ]

@@ -72,6 +72,7 @@ class ChoiceSerializer(serializers.ModelSerializer):
             'poll',
             'choice_text',
             'votes',
+            'color',
         )
 
 

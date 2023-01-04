@@ -118,3 +118,28 @@ class GetPollChoices(APIView):
         p = Choice.objects.filter(poll_id=poll_id).all()
         serializer = ChoiceSerializer(p, many=True, context={'request': request})
         return Response(serializer.data)
+
+
+class GetPollVotes(APIView):
+
+    def get(self, request, poll_id):
+        choices = Choice.objects.filter(poll_id=poll_id).values('uid')
+        votes = Vote.objects.filter(choice__uid__in=choices).all()
+        serializer = VoteSerializer(votes, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class VoteViewSet(viewsets.ModelViewSet):
+    serializer_class = VoteSerializer
+    queryset = Vote.objects.all()
+
+    def perform_create(self, serializer):
+        choice = Choice.objects.filter(uid=self.request.data['uid']).first()
+        choice.votes += 1
+        choice.save()
+        account = Account.objects.filter(user=self.request.user).first()
+
+        serializer.save(choice=choice, account=account)
+
+    def get_queryset(self):
+        return self.queryset
