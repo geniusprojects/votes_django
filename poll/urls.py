@@ -24,5 +24,6 @@ urlpatterns = [
 
     path('polls/<uuid:poll_id>/choices/', GetPollChoices.as_view(), name='get_poll_choices'),
     path('polls/<uuid:poll_id>/votes/', GetPollVotes.as_view(), name='get_poll_votes'),
+    path('polls/<uuid:poll_id>/my-vote/', GetPollMyVote.as_view(), name='get_poll_my_vote'),
     path('', include(router.urls)),
 ]

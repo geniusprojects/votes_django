@@ -129,6 +129,19 @@ class GetPollVotes(APIView):
         return Response(serializer.data)
 
 
+class GetPollMyVote(APIView):
+
+    def get(self, request, poll_id):
+        choices = Choice.objects.filter(poll_id=poll_id).values('uid')
+        if self.request.user.is_authenticated:
+            account = Account.objects.filter(user=self.request.user).first()
+            vote = Vote.objects.filter(choice__uid__in=choices, account=account).first()
+            serializer = VoteSerializer(vote, context={'request': request})
+            return Response(serializer.data)
+        else:
+            return Response({})
+
+
 class VoteViewSet(viewsets.ModelViewSet):
     serializer_class = VoteSerializer
     queryset = Vote.objects.all()
