@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CategoryGroup, Category, Poll, Choice, Vote, Account
+from .models import CategoryGroup, Category, Poll, Choice, Vote, Account, Like, DisLike
 
 from team.serializers import UserSerializer
 from gallery.serializers import GallerySerializer
@@ -24,10 +24,10 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class PollSerializer(serializers.ModelSerializer):
     account = AccountSerializer(read_only=True)
-    images = GallerySerializer(many=True, source='get_images')
-    main_image = GallerySerializer(source='get_main_images')
+    images = GallerySerializer(many=True, source='get_images', read_only=True)
+    main_image = GallerySerializer(source='get_main_images', read_only=True)
     #votes = VoteSerializer(many=True, source='get_count_votes')
-    votes_count = serializers.IntegerField(source='get_count_votes')#(many=True, source='get_count_votes')
+    votes_count = serializers.IntegerField(source='get_count_votes', read_only=True)#(many=True, source='get_count_votes')
 
     class Meta:
         model = Poll
@@ -75,6 +75,8 @@ class VoteSerializer(serializers.ModelSerializer):
             'comment',
             'updated',
             'choice',
+            'get_total_likes',
+            'get_total_dis_likes',
         )
 
 
@@ -169,3 +171,33 @@ class PopularPollSerializer(serializers.ModelSerializer):
             'main_image',
             'votes_count',
         )
+
+
+class LikesSerializer(serializers.ModelSerializer):
+    accounts = AccountSerializer(many=True, read_only=True)
+    vote = VoteSerializer(read_only=True)
+
+    class Meta:
+        model = Like
+        fields = (
+            'id',
+            'uid',
+            'accounts',
+            'vote',
+        )
+        extra_kwargs = {'accounts': {'required': False}}
+
+
+class DisLikesSerializer(serializers.ModelSerializer):
+    accounts = AccountSerializer(many=True, read_only=True)
+    vote = VoteSerializer(read_only=True)
+
+    class Meta:
+        model = DisLike
+        fields = (
+            'id',
+            'uid',
+            'accounts',
+            'vote',
+        )
+        extra_kwargs = {'accounts': {'required': False}}

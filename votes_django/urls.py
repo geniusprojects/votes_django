@@ -12,4 +12,5 @@ urlpatterns = [
     path('api/v1/', include('team.urls')),
     path('api/v1/', include('client.urls')),
     path('api/v1/', include('poll.urls')),
+    path('api/v1/', include('gallery.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

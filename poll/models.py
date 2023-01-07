@@ -78,8 +78,36 @@ class Vote(models.Model):
     comment = models.TextField('Comment', max_length=1000, blank=True, null=True)
     #value = models.BooleanField('Value')
     updated = models.DateTimeField(auto_now=True)
-    likes = models.IntegerField(default=0)
-    dislikes = models.IntegerField(default=0)
+
+    def get_total_likes(self):
+        return self.get_likes.accounts.count() if hasattr(self, 'get_likes') else 0
+
+    def get_total_dis_likes(self):
+        return self.get_dis_likes.accounts.count() if hasattr(self, 'get_dis_likes') else 0
 
     def __str__(self):
         return self.choice.choice_text + ' (' + self.choice.poll.title + ')'
+
+
+class Like(models.Model):
+    id = models.BigIntegerField(default=0)
+    uid = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True, editable=False)
+    vote = models.OneToOneField(Vote, related_name="get_likes", on_delete=models.CASCADE)
+    accounts = models.ManyToManyField(Account, related_name='requirement_comment_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.vote.comment)[:30]
+
+
+class DisLike(models.Model):
+    id = models.BigIntegerField(default=0)
+    uid = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True, editable=False)
+    vote = models.OneToOneField(Vote, related_name="get_dis_likes", on_delete=models.CASCADE)
+    accounts = models.ManyToManyField(Account, related_name='requirement_comment_dis_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.vote.comment)[:30]

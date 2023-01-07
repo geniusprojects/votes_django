@@ -14,7 +14,7 @@ from .serializers import *
 
 
 class PollPagination(PageNumberPagination):
-    page_size = 2
+    page_size = 10
 
 
 class PollViewSet(viewsets.ModelViewSet):
@@ -23,6 +23,11 @@ class PollViewSet(viewsets.ModelViewSet):
     pagination_class = PollPagination
     #filter_backends = (filters.SearchFilter,)
     #search_fields = ('account', 'title')
+
+    def perform_create(self, serializer):
+        account = Account.objects.filter(user=self.request.user).first()
+
+        serializer.save(account=account)
 
     def get_queryset(self):
         return self.queryset
@@ -34,6 +39,13 @@ class GetGroupPolls(APIView):
     def get(self, request, group_id):
         p = Poll.objects.filter(category__group=group_id).order_by('-updated').all()
         serializer = PopularPollSerializer(p, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+class GetGroupCategories(APIView):
+    def get(self, request, group_id):
+        c = Category.objects.filter(group_id=group_id).order_by('title').all()
+        serializer = CategorySerializer(c, many=True, context={'request': request})
         return Response(serializer.data)
 
 
@@ -105,8 +117,11 @@ def get_groups(request):
 class ChoiceViewSet(viewsets.ModelViewSet):
     serializer_class = ChoiceSerializer
     queryset = Choice.objects.all()
-    #filter_backends = (filters.SearchFilter,)
-    #search_fields = ('account', 'title')
+
+    def perform_create(self, serializer):
+        poll = Poll.objects.filter(uid=self.request.data['uid']).first()
+
+        serializer.save(poll=poll)
 
     def get_queryset(self):
         return self.queryset
@@ -153,6 +168,48 @@ class VoteViewSet(viewsets.ModelViewSet):
         account = Account.objects.filter(user=self.request.user).first()
 
         serializer.save(choice=choice, account=account)
+
+    def get_queryset(self):
+        return self.queryset
+
+
+class LikeViewSet(viewsets.ModelViewSet):
+    serializer_class = LikesSerializer
+    queryset = Like.objects.all()
+
+    def perform_create(self, serializer):
+        vote = Vote.objects.filter(uid=self.request.data['uid']).first()
+        account = Account.objects.filter(user=self.request.user).first()
+
+        like_obj = self.queryset.filter(vote=vote).first()
+        if like_obj:
+            like_obj.accounts.add(account)
+            like_obj.save()
+            #accounts = list(like_obj.accounts.all())
+        else:
+            accounts = [account]
+            serializer.save(vote=vote, accounts=accounts)
+
+    def get_queryset(self):
+        return self.queryset
+
+
+class DisLikeViewSet(viewsets.ModelViewSet):
+    serializer_class = DisLikesSerializer
+    queryset = DisLike.objects.all()
+
+    def perform_create(self, serializer):
+        vote = Vote.objects.filter(uid=self.request.data['uid']).first()
+        account = Account.objects.filter(user=self.request.user).first()
+
+        dislike_obj = self.queryset.filter(vote=vote).first()
+        if dislike_obj:
+            dislike_obj.accounts.add(account)
+            dislike_obj.save()
+            #accounts = list(like_obj.accounts.all())
+        else:
+            accounts = [account]
+            serializer.save(vote=vote, accounts=accounts)
 
     def get_queryset(self):
         return self.queryset
