@@ -1,11 +1,13 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render
 
-from rest_framework import viewsets, filters, generics
+from rest_framework import viewsets, filters, generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
+from votes_django import settings
+from rest_framework.exceptions import NotFound as NotFoundError
 
 from team.models import Team
 
@@ -13,14 +15,22 @@ from .models import Poll, CategoryGroup, Category, Choice, Vote
 from .serializers import *
 
 
-class PollPagination(PageNumberPagination):
-    page_size = 10
+class CustomPaginator(PageNumberPagination):
+    page_size = 20 # Number of objects to return in one page
+
+    def generate_response(self, query_set, serializer_obj, request):
+        try:
+            page_data = self.paginate_queryset(query_set, request)
+        except NotFoundError:
+            return Response({"error": "No results found for the requested page"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serialized_page = serializer_obj(page_data, many=True, context={'request': request})
+        return self.get_paginated_response(serialized_page.data)
 
 
 class PollViewSet(viewsets.ModelViewSet):
     serializer_class = PollSerializer
     queryset = Poll.objects.all()
-    pagination_class = PollPagination
     #filter_backends = (filters.SearchFilter,)
     #search_fields = ('account', 'title')
 
@@ -34,12 +44,12 @@ class PollViewSet(viewsets.ModelViewSet):
 
 
 class GetGroupPolls(APIView):
-    pagination_class = PollPagination
-
     def get(self, request, group_id):
         p = Poll.objects.filter(category__group=group_id).order_by('-updated').all()
-        serializer = PopularPollSerializer(p, many=True, context={'request': request})
-        return Response(serializer.data)
+        #serializer = PopularPollSerializer(p, many=True, context={'request': request})
+        paginator = CustomPaginator()
+        response = paginator.generate_response(p, PopularPollSerializer, request)
+        return response
 
 
 class GetGroupCategories(APIView):
@@ -58,12 +68,14 @@ class GetGroupPollsPopular(APIView):
 
 
 class GetCategoryPolls(APIView):
-    pagination_class = PollPagination
 
     def get(self, request, cat_id):
         p = Poll.objects.filter(category_id=cat_id).order_by('-updated').all()
-        serializer = PopularPollSerializer(p, many=True, context={'request': request})
-        return Response(serializer.data)
+        #serializer = PopularPollSerializer(p, many=True, context={'request': request})
+        paginator = CustomPaginator()
+        response = paginator.generate_response(p, PopularPollSerializer, request)
+        return response
+        #return Response(serializer.data)
 
 
 class GetCategoryPollsPopular(APIView):
