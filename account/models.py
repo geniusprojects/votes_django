@@ -6,6 +6,9 @@ import PIL
 from PIL import Image
 import uuid
 
+User._meta.get_field('email')._unique = True
+User._meta.get_field('email').blank = False
+User._meta.get_field('email').null = False
 
 class Account(models.Model):
     id = models.BigIntegerField(default=0)
