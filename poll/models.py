@@ -35,7 +35,7 @@ class Poll(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True, editable=False)
     account = models.ForeignKey(Account, related_name='polls', on_delete=models.CASCADE)
     title = models.CharField('Title', max_length=150)
-    description = models.TextField('Description', max_length=1000)
+    description = models.TextField('Description', max_length=5000)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     points = models.FloatField(default=0.00, blank=True)
