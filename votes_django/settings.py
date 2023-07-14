@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'poll.apps.PollConfig',
     'gallery.apps.GalleryConfig',
+    'product.apps.ProductConfig',
 ]
 
 MIDDLEWARE = [

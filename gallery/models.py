@@ -9,12 +9,14 @@ import uuid
 
 from account.models import Account
 from poll.models import Poll, Vote
+from product.models import Product
 
 
 class Gallery(models.Model):
     id = models.BigIntegerField(default=0)
     uid = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True, editable=False)
     poll = models.ForeignKey(Poll, related_name='polls', blank=True, null=True, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name='products', blank=True, null=True, on_delete=models.CASCADE)
     vote = models.ForeignKey(Vote, related_name='votes', blank=True, null=True, on_delete=models.SET_NULL)
     title = models.CharField('Title', max_length=250)
     path = models.ImageField(upload_to='images')
