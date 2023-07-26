@@ -26,7 +26,7 @@ class Category(models.Model):
     def __str__(self):
         return self.title
 
-    def less_polls(self):
+    def less_products(self):
         return Product.objects.filter(category=self)[:4]#.order_by('-choice__vote__updated').annotate(cnt=Count('choice__vote')).order_by('-cnt')[:4]
 
 
@@ -57,3 +57,7 @@ class Product(models.Model):
     def get_main_images(self):
         from gallery.models import Gallery
         return Gallery.objects.filter(product=self, main=True).first()
+
+    def get_count_points(self):
+        points = self.points
+        return points

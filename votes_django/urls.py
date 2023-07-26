@@ -13,4 +13,6 @@ urlpatterns = [
     path('api/v1/', include('client.urls')),
     path('api/v1/', include('poll.urls')),
     path('api/v1/', include('gallery.urls')),
+
+    path('api/v1/', include('product.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
