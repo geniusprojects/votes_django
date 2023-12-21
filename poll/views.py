@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from votes_django import settings
 from rest_framework.exceptions import NotFound as NotFoundError
 
+from account.permissions import *
+
 from team.models import Team
 
 from .models import Poll, CategoryGroup, Category, Choice, Vote
@@ -34,6 +36,8 @@ class PollViewSet(viewsets.ModelViewSet):
     #filter_backends = (filters.SearchFilter,)
     #search_fields = ('account', 'title')
 
+    permission_classes = (PostIfAuthor,)
+
     def perform_create(self, serializer):
         account = Account.objects.filter(user=self.request.user).first()
 
@@ -53,6 +57,7 @@ class GetGroupPolls(APIView):
 
 
 class GetGroupCategories(APIView):
+    permission_classes = (GetIfAuthor,)
     def get(self, request, group_id):
         c = Category.objects.filter(group_id=group_id).order_by('title').all()
         serializer = CategorySerializer(c, many=True, context={'request': request})

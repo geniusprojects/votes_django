@@ -1,6 +1,9 @@
 from django.contrib.auth import authenticate, get_user_model
 from djoser.conf import settings
 from djoser.serializers import TokenCreateSerializer
+from rest_framework import serializers
+from .models import Account
+from django.contrib.auth.models import Group
 
 User = get_user_model()
 
@@ -20,3 +23,23 @@ class CustomTokenCreateSerializer(TokenCreateSerializer):
         if self.user: # and self.user.is_active:
             return attrs
         self.fail("invalid_credentials")
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('name',)
+
+
+class CurrentUserSerializer(serializers.ModelSerializer):
+    groups = GroupSerializer(many=True)
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'id', 'first_name', 'last_name', 'groups')
+
+
+class userProfileSerializer(serializers.ModelSerializer):
+    user = CurrentUserSerializer(read_only=True)
+    class Meta:
+        model = Account
+        fields = '__all__'

@@ -40,6 +40,9 @@ class Poll(models.Model):
     updated = models.DateTimeField(auto_now=True)
     points = models.FloatField(default=0.00, blank=True)
     category = models.ForeignKey(Category, related_name='polls', on_delete=models.CASCADE)
+    private = models.BooleanField('Private Poll', blank=True, default=False)
+    promo = models.BooleanField('Promo Poll', blank=True, default=False)
+    only_for_verify = models.BooleanField('Only For Verify Users', blank=True, default=False)
 
     def __str__(self):
         return self.title
