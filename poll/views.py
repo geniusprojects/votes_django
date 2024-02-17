@@ -36,7 +36,7 @@ class PollViewSet(viewsets.ModelViewSet):
     #filter_backends = (filters.SearchFilter,)
     #search_fields = ('account', 'title')
 
-    permission_classes = (PostIfAuthor, PostIfPromo)
+    permission_classes = (PostIfAuthor|PostIfPromo, )
 
     def perform_create(self, serializer):
         account = Account.objects.filter(user=self.request.user).first()
@@ -57,7 +57,7 @@ class GetGroupPolls(APIView):
 
 
 class GetGroupCategories(APIView):
-    permission_classes = (GetIfAuthor, GetIfPromo)
+    permission_classes = (GetIfAuthor|GetIfPromo, )
     def get(self, request, group_id):
         c = Category.objects.filter(group_id=group_id).order_by('title').all()
         serializer = CategorySerializer(c, many=True, context={'request': request})

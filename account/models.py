@@ -40,3 +40,16 @@ def save_user_account(sender, instance, created, **kwargs):
 class Pin(models.Model):
     phone = models.CharField(max_length=20)
     pins = models.CharField(max_length=10)
+
+
+class Purchase(models.Model):
+    id = models.BigIntegerField(default=0)
+    uid = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True, editable=False)
+    account = models.ForeignKey(Account, related_name='purchases', on_delete=models.CASCADE)
+    amount = models.FloatField(default=0)
+    status = models.IntegerField(blank=True, default=0)
+    method = models.IntegerField(blank=True, default=0)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
